@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /Users/brian.odhiambo/Desktop/mambo/libs/Pagi -type f -name *.gradle* -o -name *.toml -o -name *.xml -o -name *.kt -o -name *.properties -o -name *.json)",
+      "Bash(find /Users/brian.odhiambo/Desktop/mambo/libs/Pagi/app/src -name *.kt)",
+      "Bash(./gradlew dependencies:*)"
+    ]
+  }
+}
