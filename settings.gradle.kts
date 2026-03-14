@@ -24,3 +24,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Pagi"
 include(":app")
+// libs
+include(":pagi:core")
