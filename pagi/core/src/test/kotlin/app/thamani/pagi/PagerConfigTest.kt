@@ -9,25 +9,25 @@ class PagerConfigTest {
     // --- Defaults ---
 
     @Test
-    fun `default pageSize is 20`() {
+    fun `the default page size is 20`() {
         assertEquals(20, PagerConfig().pageSize)
     }
 
     @Test
-    fun `default prefetchDistance equals pageSize`() {
+    fun `the default prefetch distance equals the page size`() {
         val config = PagerConfig(pageSize = 15)
         assertEquals(15, config.prefetchDistance)
     }
 
     @Test
-    fun `default maxSize is null`() {
+    fun `the default max size is null meaning unlimited`() {
         assertNull(PagerConfig().maxSize)
     }
 
     // --- Custom values ---
 
     @Test
-    fun `accepts custom values`() {
+    fun `custom page size, prefetch distance, and max size are accepted`() {
         val config = PagerConfig(pageSize = 10, prefetchDistance = 5, maxSize = 100)
 
         assertEquals(10, config.pageSize)
@@ -36,7 +36,7 @@ class PagerConfigTest {
     }
 
     @Test
-    fun `prefetchDistance can be zero`() {
+    fun `a prefetch distance of zero is valid`() {
         val config = PagerConfig(pageSize = 10, prefetchDistance = 0)
         assertEquals(0, config.prefetchDistance)
     }
@@ -44,28 +44,28 @@ class PagerConfigTest {
     // --- Validation ---
 
     @Test(expected = IllegalArgumentException::class)
-    fun `pageSize must be greater than zero`() {
+    fun `a page size of zero is rejected`() {
         PagerConfig(pageSize = 0)
     }
 
     @Test(expected = IllegalArgumentException::class)
-    fun `negative pageSize is rejected`() {
+    fun `a negative page size is rejected`() {
         PagerConfig(pageSize = -1)
     }
 
     @Test(expected = IllegalArgumentException::class)
-    fun `negative prefetchDistance is rejected`() {
+    fun `a negative prefetch distance is rejected`() {
         PagerConfig(pageSize = 10, prefetchDistance = -1)
     }
 
     @Test(expected = IllegalArgumentException::class)
-    fun `maxSize too small is rejected`() {
+    fun `a max size smaller than pageSize plus twice the prefetch distance is rejected`() {
         // pageSize=10, prefetchDistance=10 → minimum maxSize = 10 + 2*10 = 30
         PagerConfig(pageSize = 10, prefetchDistance = 10, maxSize = 20)
     }
 
     @Test
-    fun `maxSize at exact minimum is accepted`() {
+    fun `a max size at the exact minimum threshold is accepted`() {
         // pageSize=10, prefetchDistance=5 → minimum maxSize = 10 + 2*5 = 20
         val config = PagerConfig(pageSize = 10, prefetchDistance = 5, maxSize = 20)
         assertEquals(20, config.maxSize)
@@ -74,7 +74,7 @@ class PagerConfigTest {
     // --- Equality ---
 
     @Test
-    fun `identical configs are equal`() {
+    fun `two configs with the same values are equal`() {
         val a = PagerConfig(pageSize = 25, prefetchDistance = 10)
         val b = PagerConfig(pageSize = 25, prefetchDistance = 10)
 

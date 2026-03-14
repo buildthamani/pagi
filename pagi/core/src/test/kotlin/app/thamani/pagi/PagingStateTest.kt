@@ -10,13 +10,13 @@ class PagingStateTest {
     // --- Default state ---
 
     @Test
-    fun `default state has empty items`() {
+    fun `a new paging state starts with an empty items list`() {
         val state = PagingState<Int, String>()
         assertTrue(state.items.isEmpty())
     }
 
     @Test
-    fun `default state has all Idle page states`() {
+    fun `a new paging state has all three directions set to Idle`() {
         val state = PagingState<Int, String>()
         assertEquals(PageState.Idle, state.pageStates.refresh)
         assertEquals(PageState.Idle, state.pageStates.prepend)
@@ -24,7 +24,7 @@ class PagingStateTest {
     }
 
     @Test
-    fun `default state has no pages`() {
+    fun `a new paging state has no loaded pages`() {
         val state = PagingState<Int, String>()
         assertTrue(state.pages.isEmpty())
     }
@@ -32,7 +32,7 @@ class PagingStateTest {
     // --- isInitialLoading ---
 
     @Test
-    fun `isInitialLoading is true when empty and refresh is Loading`() {
+    fun `isInitialLoading is true when items are empty and refresh is Loading`() {
         val state = PagingState<Int, String>(
             pageStates = PageStates(refresh = PageState.Loading),
         )
@@ -40,7 +40,7 @@ class PagingStateTest {
     }
 
     @Test
-    fun `isInitialLoading is false when items exist even if refresh is Loading`() {
+    fun `isInitialLoading is false when items already exist even if refresh is Loading`() {
         val state = PagingState<Int, String>(
             items = listOf("a"),
             pageStates = PageStates(refresh = PageState.Loading),
@@ -49,7 +49,7 @@ class PagingStateTest {
     }
 
     @Test
-    fun `isInitialLoading is false when empty and refresh is Idle`() {
+    fun `isInitialLoading is false when items are empty and refresh is Idle`() {
         val state = PagingState<Int, String>()
         assertFalse(state.isInitialLoading)
     }
@@ -57,7 +57,7 @@ class PagingStateTest {
     // --- isInitialError ---
 
     @Test
-    fun `isInitialError is true when empty and refresh is Error`() {
+    fun `isInitialError is true when items are empty and refresh is Error`() {
         val state = PagingState<Int, String>(
             pageStates = PageStates(
                 refresh = PageState.Error(PagingError.Source("failed")),
@@ -78,7 +78,7 @@ class PagingStateTest {
     }
 
     @Test
-    fun `isInitialError is false when empty and refresh is Loading`() {
+    fun `isInitialError is false when items are empty and refresh is Loading`() {
         val state = PagingState<Int, String>(
             pageStates = PageStates(refresh = PageState.Loading),
         )
@@ -88,13 +88,13 @@ class PagingStateTest {
     // --- hasItems ---
 
     @Test
-    fun `hasItems is true when items exist`() {
+    fun `hasItems is true when the items list is not empty`() {
         val state = PagingState<Int, String>(items = listOf("x", "y"))
         assertTrue(state.hasItems)
     }
 
     @Test
-    fun `hasItems is false when items is empty`() {
+    fun `hasItems is false when the items list is empty`() {
         val state = PagingState<Int, String>()
         assertFalse(state.hasItems)
     }
@@ -102,13 +102,13 @@ class PagingStateTest {
     // --- isEmpty ---
 
     @Test
-    fun `isEmpty is true when no items and refresh is Idle`() {
+    fun `isEmpty is true when there are no items and refresh is Idle`() {
         val state = PagingState<Int, String>()
         assertTrue(state.isEmpty)
     }
 
     @Test
-    fun `isEmpty is true when no items and refresh is Error`() {
+    fun `isEmpty is true when there are no items and refresh has an Error`() {
         val state = PagingState<Int, String>(
             pageStates = PageStates(
                 refresh = PageState.Error(PagingError.Source("err")),
@@ -118,7 +118,7 @@ class PagingStateTest {
     }
 
     @Test
-    fun `isEmpty is false when refresh is Loading even if no items`() {
+    fun `isEmpty is false when refresh is Loading even if there are no items yet`() {
         val state = PagingState<Int, String>(
             pageStates = PageStates(refresh = PageState.Loading),
         )
@@ -134,7 +134,7 @@ class PagingStateTest {
     // --- Data class behavior ---
 
     @Test
-    fun `identical states are equal`() {
+    fun `two paging states with the same data are equal`() {
         val page = PageSourceResult.Success(
             items = listOf("a"),
             prevKey = null,
@@ -148,7 +148,7 @@ class PagingStateTest {
     }
 
     @Test
-    fun `copy preserves unmodified fields`() {
+    fun `copying a paging state preserves fields that were not changed`() {
         val original = PagingState<Int, String>(
             items = listOf("a", "b"),
             pageStates = PageStates(append = PageState.Loading),

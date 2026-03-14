@@ -3,6 +3,7 @@ package app.thamani.pagi
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,20 +15,21 @@ import kotlinx.coroutines.sync.withLock
 /**
  * Orchestrates paged data loading from a [PageSource].
  *
- * The Pager does not create its own [CoroutineScope] — every method that
- * launches work takes a `scope` parameter. The caller owns the lifecycle.
- *
  * Observe [state] to render the paged list. Call [refresh] to start loading,
  * [onItemAccessed] to trigger prefetching, and [retry] to retry failed loads.
  *
  * @param config     paging configuration (page size, prefetch distance, max size)
  * @param initialKey the key for the first page, or null to let the source decide
  * @param source     the data source to load pages from
+ * @param scope      the coroutine scope for all loading work. Defaults to a
+ *                   [SupervisorJob]-backed scope so child failures are isolated.
+ *                   Pass `viewModelScope` on Android for automatic lifecycle cancellation.
  */
 class Pager<Key : Any, Value : Any>(
     private val config: PagerConfig,
     private val initialKey: Key? = null,
     private val source: PageSource<Key, Value>,
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob()),
 ) {
     private val _state = MutableStateFlow(PagingState<Key, Value>())
 
@@ -43,7 +45,7 @@ class Pager<Key : Any, Value : Any>(
      *
      * Returns the [Job] so the caller can `join()` or cancel if needed.
      */
-    fun refresh(scope: CoroutineScope): Job =
+    fun refresh(): Job =
         scope.launch {
             refreshMutex.withLock {
                 _state.update {
@@ -93,41 +95,44 @@ class Pager<Key : Any, Value : Any>(
      * The pager checks whether this index is close enough to the edges
      * (within [PagerConfig.prefetchDistance]) to trigger an append or prepend.
      */
-    fun onItemAccessed(
-        index: Int,
-        scope: CoroutineScope,
-    ) {
+    fun onItemAccessed(index: Int) {
         val current = _state.value
         val itemCount = current.items.size
 
-        // Append: near the end
-        if (index >= itemCount - config.prefetchDistance &&
+        // Append: near the end (0-based, so last valid index = itemCount - 1)
+        if (index >= itemCount - 1 - config.prefetchDistance &&
             current.pageStates.append is PageState.Idle
         ) {
-            loadAppend(scope)
+            loadAppend()
         }
 
         // Prepend: near the start
         if (index <= config.prefetchDistance &&
             current.pageStates.prepend is PageState.Idle
         ) {
-            loadPrepend(scope)
+            loadPrepend()
         }
     }
 
     /**
      * Retry all directions that are currently in an error state.
      */
-    fun retry(scope: CoroutineScope) {
+    fun retry() {
         val ps = _state.value.pageStates
-        if (ps.refresh is PageState.Error) refresh(scope)
-        if (ps.append is PageState.Error) loadAppend(scope)
-        if (ps.prepend is PageState.Error) loadPrepend(scope)
+        if (ps.refresh is PageState.Error) refresh()
+        if (ps.append is PageState.Error) {
+            _state.update { it.copy(pageStates = it.pageStates.copy(append = PageState.Idle)) }
+            loadAppend()
+        }
+        if (ps.prepend is PageState.Error) {
+            _state.update { it.copy(pageStates = it.pageStates.copy(prepend = PageState.Idle)) }
+            loadPrepend()
+        }
     }
 
     // --- Internal load functions ---
 
-    private fun loadAppend(scope: CoroutineScope): Job =
+    private fun loadAppend(): Job =
         scope.launch {
             appendMutex.withLock {
                 // Re-check after acquiring the mutex — state may have changed
@@ -181,7 +186,7 @@ class Pager<Key : Any, Value : Any>(
             }
         }
 
-    private fun loadPrepend(scope: CoroutineScope): Job =
+    private fun loadPrepend(): Job =
         scope.launch {
             prependMutex.withLock {
                 val current = _state.value

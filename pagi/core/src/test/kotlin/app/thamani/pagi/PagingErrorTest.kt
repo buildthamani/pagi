@@ -7,7 +7,7 @@ import org.junit.Test
 
 class PagingErrorTest {
     @Test
-    fun `Source error stores message and cause`() {
+    fun `a source error stores both the message and the underlying cause`() {
         val cause = RuntimeException("connection reset")
         val error = PagingError.Source("Timeout", cause)
 
@@ -16,7 +16,7 @@ class PagingErrorTest {
     }
 
     @Test
-    fun `Source error cause defaults to null`() {
+    fun `a source error without a cause defaults cause to null`() {
         val error = PagingError.Source("Something failed")
 
         assertEquals("Something failed", error.message)
@@ -26,7 +26,7 @@ class PagingErrorTest {
     // --- Equality (data class) ---
 
     @Test
-    fun `same Source errors are equal`() {
+    fun `two source errors with the same message are equal`() {
         val a = PagingError.Source("timeout")
         val b = PagingError.Source("timeout")
 
@@ -35,7 +35,7 @@ class PagingErrorTest {
     }
 
     @Test
-    fun `different Source errors are not equal`() {
+    fun `two source errors with different messages are not equal`() {
         val a = PagingError.Source("timeout")
         val b = PagingError.Source("refused")
 
@@ -45,14 +45,14 @@ class PagingErrorTest {
     // --- Type hierarchy ---
 
     @Test
-    fun `Source error is a PagingError`() {
+    fun `a source error can be assigned to the PagingError sealed type`() {
         val error: PagingError = PagingError.Source("test")
 
         assertTrue(error is PagingError.Source)
     }
 
     @Test
-    fun `message is accessible through PagingError interface`() {
+    fun `the message is accessible through the PagingError interface`() {
         val error: PagingError = PagingError.Source("fetch failed")
 
         assertEquals("fetch failed", error.message)
@@ -61,7 +61,7 @@ class PagingErrorTest {
     // --- Exhaustive matching ---
 
     @Test
-    fun `when expression covers all current variants`() {
+    fun `a when expression exhaustively matches all PagingError variants`() {
         val error: PagingError = PagingError.Source("timeout")
 
         // This compiles exhaustively — if we add a new variant later,

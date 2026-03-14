@@ -7,22 +7,22 @@ import org.junit.Test
 class PageStateTest {
 
     @Test
-    fun `Idle is a singleton`() {
+    fun `Idle is a singleton with referential equality`() {
         assertTrue(PageState.Idle === PageState.Idle)
     }
 
     @Test
-    fun `Loading is a singleton`() {
+    fun `Loading is a singleton with referential equality`() {
         assertTrue(PageState.Loading === PageState.Loading)
     }
 
     @Test
-    fun `Complete is a singleton`() {
+    fun `Complete is a singleton with referential equality`() {
         assertTrue(PageState.Complete === PageState.Complete)
     }
 
     @Test
-    fun `Error carries a PagingError`() {
+    fun `an error state carries the original PagingError`() {
         val pagingError = PagingError.Source("timeout")
         val state = PageState.Error(pagingError)
 
@@ -30,7 +30,7 @@ class PageStateTest {
     }
 
     @Test
-    fun `Error equality is based on the wrapped error`() {
+    fun `two error states with the same PagingError are equal`() {
         val a = PageState.Error(PagingError.Source("timeout"))
         val b = PageState.Error(PagingError.Source("timeout"))
 
@@ -38,7 +38,7 @@ class PageStateTest {
     }
 
     @Test
-    fun `when expression covers all variants`() {
+    fun `a when expression exhaustively matches all PageState variants`() {
         val states = listOf(
             PageState.Idle,
             PageState.Loading,

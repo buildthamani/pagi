@@ -8,7 +8,7 @@ import org.junit.Test
 class PageSourceTest {
 
     @Test
-    fun `can be implemented as a lambda`() = runTest {
+    fun `a page source can be implemented as a lambda`() = runTest {
         val source = PageSource<Int, String> { params ->
             PageSourceResult.Success(
                 items = listOf("a", "b"),
@@ -28,7 +28,7 @@ class PageSourceTest {
     }
 
     @Test
-    fun `can return an error`() = runTest {
+    fun `a page source can return an error result`() = runTest {
         val source = PageSource<Int, String> {
             PageSourceResult.Error(PagingError.Source("something broke"))
         }
@@ -43,7 +43,7 @@ class PageSourceTest {
     }
 
     @Test
-    fun `can be implemented as a class`() = runTest {
+    fun `a page source can be implemented as a class`() = runTest {
         class TestSource : PageSource<String, Int> {
             override suspend fun load(params: LoadParams<String>): PageSourceResult<String, Int> {
                 return PageSourceResult.Success(
@@ -66,7 +66,7 @@ class PageSourceTest {
     }
 
     @Test
-    fun `receives params correctly`() = runTest {
+    fun `the page source receives the exact LoadParams that were passed in`() = runTest {
         var receivedParams: LoadParams<Int>? = null
 
         val source = PageSource<Int, String> { params ->

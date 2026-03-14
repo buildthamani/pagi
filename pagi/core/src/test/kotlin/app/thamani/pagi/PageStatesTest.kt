@@ -6,7 +6,7 @@ import org.junit.Test
 class PageStatesTest {
 
     @Test
-    fun `default PageStates has all directions Idle`() {
+    fun `a default PageStates has all three directions set to Idle`() {
         val states = PageStates()
 
         assertEquals(PageState.Idle, states.refresh)
@@ -15,7 +15,7 @@ class PageStatesTest {
     }
 
     @Test
-    fun `identical PageStates are equal`() {
+    fun `two PageStates with the same direction values are equal`() {
         val a = PageStates(refresh = PageState.Loading, append = PageState.Idle)
         val b = PageStates(refresh = PageState.Loading, append = PageState.Idle)
 
@@ -23,7 +23,7 @@ class PageStatesTest {
     }
 
     @Test
-    fun `copy updates only specified direction`() {
+    fun `copying a PageStates updates only the specified direction`() {
         val original = PageStates()
         val updated = original.copy(append = PageState.Loading)
 

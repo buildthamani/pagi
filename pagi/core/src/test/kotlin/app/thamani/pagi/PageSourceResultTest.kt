@@ -10,7 +10,7 @@ class PageSourceResultTest {
     // --- Success construction ---
 
     @Test
-    fun `Success holds items and navigation keys`() {
+    fun `a successful result holds items and navigation keys`() {
         val result = PageSourceResult.Success(
             items = listOf("a", "b", "c"),
             prevKey = null,
@@ -23,7 +23,7 @@ class PageSourceResultTest {
     }
 
     @Test
-    fun `Success with both navigation keys`() {
+    fun `a successful result can have both prev and next keys`() {
         val result = PageSourceResult.Success(
             items = listOf("x"),
             prevKey = 1,
@@ -35,7 +35,7 @@ class PageSourceResultTest {
     }
 
     @Test
-    fun `Success with no more data in either direction`() {
+    fun `a successful result with null keys means no more data in either direction`() {
         val result = PageSourceResult.Success(
             items = listOf("only"),
             prevKey = null,
@@ -47,7 +47,7 @@ class PageSourceResultTest {
     }
 
     @Test
-    fun `Success with empty items list`() {
+    fun `a successful result can hold an empty items list`() {
         val result = PageSourceResult.Success(
             items = emptyList<String>(),
             prevKey = null,
@@ -60,7 +60,7 @@ class PageSourceResultTest {
     // --- Error construction ---
 
     @Test
-    fun `Error wraps a PagingError`() {
+    fun `an error result wraps a PagingError`() {
         val pagingError = PagingError.Source("timeout")
         val result = PageSourceResult.Error(pagingError)
 
@@ -70,7 +70,7 @@ class PageSourceResultTest {
     // --- Pattern matching ---
 
     @Test
-    fun `can pattern match Success vs Error`() {
+    fun `a when expression can pattern match Success vs Error`() {
         val success: PageSourceResult<Int, String> = PageSourceResult.Success(
             items = listOf("item"),
             prevKey = null,
@@ -98,7 +98,7 @@ class PageSourceResultTest {
     // --- Data class equality ---
 
     @Test
-    fun `identical Successes are equal`() {
+    fun `two identical successful results are equal`() {
         val a = PageSourceResult.Success(listOf("x"), prevKey = null, nextKey = 1)
         val b = PageSourceResult.Success(listOf("x"), prevKey = null, nextKey = 1)
 
@@ -107,7 +107,7 @@ class PageSourceResultTest {
     }
 
     @Test
-    fun `identical Errors are equal`() {
+    fun `two identical error results are equal`() {
         val a = PageSourceResult.Error(PagingError.Source("err"))
         val b = PageSourceResult.Error(PagingError.Source("err"))
 
@@ -117,7 +117,7 @@ class PageSourceResultTest {
     // --- Covariance ---
 
     @Test
-    fun `Error is covariant — assignable to any PageSourceResult type`() {
+    fun `an error result is assignable to any PageSourceResult type thanks to Nothing covariance`() {
         val result: PageSourceResult<Int, String> = PageSourceResult.Error(
             PagingError.Source("test"),
         )
