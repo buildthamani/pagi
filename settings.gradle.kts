@@ -26,4 +26,5 @@ rootProject.name = "Pagi"
 include(":app")
 // libs
 include(":pagi:core")
+include(":pagi:compose")
 include(":pagi:benchmarks")
